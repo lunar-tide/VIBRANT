@@ -77,11 +77,9 @@ def getAllSetpMemoryDump(debugger: lldb.SBDebugger, command, result, internal_di
     allstep = 1
     debugger.HandleCommand('b main')
     debugger.HandleCommand('run')
-    # 获取target：与被调试的可执行文件有关
     target: lldb.SBTarget = debugger.GetSelectedTarget()
 
     process: lldb.SBProcess = target.GetProcess()
-    # 目前只能处理单一线程
     thread: lldb.SBThread = process.GetSelectedThread()
 
     while process.is_alive:
@@ -92,7 +90,7 @@ def getAllSetpMemoryDump(debugger: lldb.SBDebugger, command, result, internal_di
 
         now_time = datetime.datetime.now().strftime('%Y-%m-%d-%H:%M:%S')
 
-        file_path = 'dump/{}-{}-{}'.format(threadName, allstep, now_time)  # 设置输出文件路径
+        file_path = 'dump/{}-{}-{}'.format(threadName, allstep, now_time)
         file = open(file_path, mode='wb+')
 
         memRegionInfo = lldb.SBMemoryRegionInfo()
@@ -105,13 +103,13 @@ def getAllSetpMemoryDump(debugger: lldb.SBDebugger, command, result, internal_di
             err = lldb.SBError()
             content = process.ReadMemory(rbase, rend - rbase, err)
             if (content != None):
-                if regionName == None:  # 如果region名是None的话直接dump
+                if regionName == None:
                     file.write(content)
                     print("dump region: " + str(regionName))
-                elif ".so" not in regionName:  # 如果region名不保护.so说明不是共享库，直接dump
+                elif ".so" not in regionName:
                     file.write(content)
                     print("dump region: " + str(regionName))
-                else:  # 否则说明regionName中含有.so，是共享库，不dump
+                else:
                     continue
 
         file.close()
